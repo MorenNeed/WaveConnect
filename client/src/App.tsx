@@ -1,52 +1,66 @@
-import './App.scss'
-import React, { useState } from 'react'
-import messageApi from './api'
-import { Message } from '../../shared'
+import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { ThemeProvider } from "@mui/material";
+import { StyledEngineProvider } from '@mui/material/styles';
+import { PrivateRoute, PublicRoute } from "./routes/route";
+import Inbox from "./pages/Inbox";
+import Register from "./components/auth/Register";
+import Login from "./components/auth/Login";
+import AuthProvider from "./hooks/AuthProvider";
+import UsersProvider from "./hooks/UsersProvider";
+import ConversationProvider from "./hooks/ConversationsProvider";
+import MessagesProvider from "./hooks/MessagesProvider";
+import CustomThemeProvider, { useTheme } from "./hooks/CustomThemeProvider";
 
-function App() {
-  const [message, setMessage] = useState<Message | undefined>()
-  const [error, setError] = useState<Error | null>(null)
 
-  const sendWrongMessage = () => {
-    setMessage(undefined)
 
-    messageApi.sendWrongMessage().then(setMessage).catch(setError)
-  }
 
-  const sendRightMessage = () => {
-    setError(null)
+const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { theme } = useTheme();
 
-    messageApi.sendRightMessage().then(setMessage).catch(setError)
-  }
+    return (
+        <StyledEngineProvider injectFirst>
+            <AuthProvider>
+                <UsersProvider>
+                    <ConversationProvider>
+                        <MessagesProvider>
+                            <CustomThemeProvider>
+                                <ThemeProvider theme={theme}>
+                                    {children}
+                                </ThemeProvider>
+                            </CustomThemeProvider>
+                        </MessagesProvider>
+                    </ConversationProvider>
+                </UsersProvider>
+            </AuthProvider>
+        </StyledEngineProvider>
+    );
+};
 
-  return (
-    <>
-      <header>
-        <h1>React + Express + TypeScript Template</h1>
-      </header>
-      <main>
-        <div>
-          <button onClick={sendWrongMessage} className='wrong-message'>
-            Send wrong message
-          </button>
-          <button onClick={sendRightMessage} className='right-message'>
-            Send right message
-          </button>
-          <button onClick={() => window.location.reload()}>Reload window</button>
+const App: React.FC = () => {
+    return (
+        <div className="app">
+            <Router>
+                <Routes>
+                    <Route element={<PrivateRoute />}>
+                        <Route path="/" element={<Inbox />} />
+                    </Route>
+                    <Route element={<PublicRoute />}>
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<Login />} />
+                    </Route>
+                </Routes>
+            </Router>
         </div>
-        {message && (
-          <div className='message-container'>
-            <h2>{message.title}</h2>
-            <p>{message.body}</p>
-          </div>
-        )}
-        {error && <p className='error-message'>{error.message}</p>}
-      </main>
-      <footer>
-        <p>&copy; 2021. Not all rights reserved</p>
-      </footer>
-    </>
-  )
-}
+    );
+};
 
-export default App
+const AppWithProviders: React.FC = () => {
+    return (
+        <AppProviders>
+            <App />
+        </AppProviders>
+    );
+};
+
+export default AppWithProviders;
