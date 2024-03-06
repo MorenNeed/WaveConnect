@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         position: "sticky",
         top: 0,
         zIndex: 1000,
-        padding: theme.spacing(1, 2),
+        padding: `3px ${theme.spacing(2)}`,
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.default,
         display: "flex",

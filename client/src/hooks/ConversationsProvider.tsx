@@ -13,6 +13,7 @@ interface ConversationContextValue {
     getConversations: (userId: string) => void;
     addMessage: (conversationId: string, message: Message) => void;
     selectConversation: (conversation: Conversation) => void;
+    unselectConversation: () => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
@@ -61,6 +62,10 @@ const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedConversation(conversation);
     }
 
+    const unselectConversation = () => {
+        setSelectedConversation(null);
+    }
+
     const addMessage = (conversationId: string, message: Message) => {
         addMessageToConversationCall(conversationId, message)
             .then((conversation) => {
@@ -77,7 +82,7 @@ const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     return (
-        <ConversationContext.Provider value={{ userConversations, selectedConversation, error, loading, createConversation, getConversations, selectConversation, addMessage }}>
+        <ConversationContext.Provider value={{ userConversations, selectedConversation, error, loading, createConversation, getConversations, selectConversation, addMessage, unselectConversation }}>
             {children}
         </ConversationContext.Provider>
     );

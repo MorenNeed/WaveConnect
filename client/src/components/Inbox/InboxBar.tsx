@@ -1,11 +1,10 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Avatar, IconButton, Typography, Tooltip } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { Theme } from "@mui/system";
-import { useTheme } from "../../hooks/CustomThemeProvider";
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+import { Menu, MenuOpen } from "@mui/icons-material";
+import { useMobile } from "../../hooks/MobileProvider";
 
 const useStyles = makeStyles((theme: Theme) => ({
     inboxBar: {
@@ -28,31 +27,36 @@ const useStyles = makeStyles((theme: Theme) => ({
     iconButton: {
         color: theme.palette.primary.contrastText,
     },
+    menuButton: {
+        color: theme.palette.primary.contrastText,
+    },
 }));
 
 const InboxBar = ({ username, onSettingsClick, onLogoutClick }) => {
     const classes = useStyles();
-    const { theme, toggleTheme } = useTheme();
+    const { isMobile, menuToggled, toggleMenuClick } = useMobile();
 
     return (
         <div className={classes.inboxBar}>
             <div className={classes.userInfo}>
+                {isMobile ? (
+                <Tooltip title="Toggle Menu">
+                    <IconButton onClick={toggleMenuClick} aria-label="menu" className={classes.menuButton}>
+                        {menuToggled ? <Menu /> : <MenuOpen />}
+                    </IconButton>
+                </Tooltip>
+                ) : null}
                 <Avatar alt="User Avatar" />
                 <Typography variant="body1" className={classes.username}>
                     {username}
                 </Typography>
             </div>
             <div>
-                <Tooltip title="Theme">
-                    <IconButton aria-label="theme" className={classes.iconButton} onClick={toggleTheme}>
-                        {theme.palette.mode === "light" ? <Brightness4 /> : <Brightness7 />}
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Settings">
+                {/* <Tooltip title="Settings">
                     <IconButton onClick={onSettingsClick} aria-label="settings" className={classes.iconButton}>
                         <SettingsIcon />
                     </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title="Logout">
                     <IconButton onClick={onLogoutClick} aria-label="logout" className={classes.iconButton}>
                         <ExitToAppIcon />

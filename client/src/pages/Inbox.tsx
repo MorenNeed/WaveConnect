@@ -8,6 +8,8 @@ import InboxBar from "../components/Inbox/InboxBar";
 import { useNavigate } from "react-router-dom";
 import ConversationContent from "../components/Inbox/ConversationContent";
 import MessageInput from "../components/Inbox/MessageInput";
+import { useConversation } from "../hooks/ConversationsProvider";
+import { useMobile } from "../hooks/MobileProvider";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -40,6 +42,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 const Inbox = () => {
   const classes = useStyles();
   const { user, logout } = useAuth();
+  const { unselectConversation } = useConversation();
+  const { menuToggled } = useMobile();
   const navigate = useNavigate();
 
   const handleSettingsClick = () => {
@@ -47,9 +51,8 @@ const Inbox = () => {
   };
 
   const handleLogoutClick = () => {
+    unselectConversation();
     logout();
-
-    // Redirect to login page
     navigate("/login");
   };
 
@@ -61,10 +64,12 @@ const Inbox = () => {
         onLogoutClick={handleLogoutClick}
       />
       <div className={classes.chatSection}>
-        <Paper className={classes.chatListContainer} elevation={0}>
-          <SearchBar />
-          <InboxList />
-        </Paper>
+        {menuToggled ? null : (
+          <Paper className={classes.chatListContainer} elevation={0}>
+            <SearchBar />
+            <InboxList />
+          </Paper>
+        )}
         <div className={classes.chatContent}>
           <ConversationContent />
           <MessageInput />

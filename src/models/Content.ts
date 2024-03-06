@@ -1,5 +1,6 @@
+import { Attachement } from "./Attachement";
+
 export interface Content {
-    type: string;
-    text?: string;
-    file?: File | string;
+    text: string;
+    attachements: Attachement[] | null;
 }

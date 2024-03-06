@@ -55,9 +55,10 @@ const InboxList = () => {
                         <div className={classes.inboxInfo}>
                             <Typography variant="h6">{conversation.name}</Typography>
                             <Typography variant="body2" color="textSecondary">
-                                {conversation.lastMessage?.content.type === "text"
-                                    ? conversation.lastMessage?.content.text
-                                    : conversation.lastMessage?.content.file?.toString()}
+                                {conversation.lastMessage?.content.text}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                                {conversation.lastMessage?.content.attachements?.length ?? 0 > 0 ? "📎" : ""}
                             </Typography>
                         </div>
                         {/* {conversation.unreadCount > 0 && (

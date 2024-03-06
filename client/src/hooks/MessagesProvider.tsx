@@ -6,7 +6,7 @@ import { Message } from "../types/Message";
 interface MessagesContextValue {
     error: string | null;
     loading: boolean;
-    createMessage: (sender: string, content: Content, conversationId: string) => Promise<Message>;
+    createMessage: (sender: string, content: Content, files: File[], conversationId: string) => Promise<Message>;
     // TODO: Implement the rest of the CRUD operations
     // updateMessage: (message: Message) => void;
     // deleteMessage: (messageId: string) => void;
@@ -26,10 +26,10 @@ const MessagesProvider: React.FC<{ children: React.ReactNode }> = ({ children })
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const createMessage = async (sender: string, content: Content, conversationId: string): Promise<Message> => {
+    const createMessage = async (sender: string, content: Content, files: File[], conversationId: string): Promise<Message> => {
         setLoading(true);
         try {
-            const message = await createMessageCall(sender, content, conversationId);
+            const message = await createMessageCall(sender, content, files, conversationId);
             setLoading(false);
             return message;
         } catch (error) {

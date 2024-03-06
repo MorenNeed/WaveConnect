@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { makeStyles } from "@mui/styles";
 import { Typography, Paper } from "@mui/material";
 import { Theme } from "@mui/system";
 import { useConversation } from "../../hooks/ConversationsProvider";
 import { useAuth } from "../../hooks/AuthProvider";
+import { Message } from "../../types/Message";
+import { Attachement } from "../../types/Attachement";
+import FileContent from "./FileContent";
 
 const useStyles = makeStyles((theme: Theme) => ({
   contentContainer: {
@@ -41,6 +44,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRadius: theme.shape.borderRadius,
     marginBottom: theme.spacing(1),
     width: "fit-content",
+    maxWidth: "40%",
   },
   ownMessage: {
     backgroundColor: theme.palette.primary.light,
@@ -54,6 +58,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   messageText: {
     color: theme.palette.text.secondary,
   },
+  messageFile: {
+    color: theme.palette.text.primary,
+    textDecoration: "none",
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1),
+    backgroundColor: theme.palette.action.hover,
+    display: "block",
+    width: "fit-content",
+  },
   timestamp: {
     color: theme.palette.text.secondary,
     fontSize: "0.75rem",
@@ -65,6 +78,13 @@ const ConversationContent = () => {
   const classes = useStyles();
   const { selectedConversation } = useConversation();
   const { user } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedConversation]);
 
   return (
     <div className={classes.contentContainer}>
@@ -86,11 +106,15 @@ const ConversationContent = () => {
                   <Typography variant="body1" className={classes.messageText}>
                     {message.content.text}
                   </Typography>
+                  {message.content.attachements?.map((attachement: Attachement) => (
+                    <FileContent key={attachement.name} attachment={attachement} />
+                  ))}
                   <Typography variant="body2" className={classes.timestamp}>
                     {new Date(message.updatedAt).toLocaleString()}
                   </Typography>
                 </Paper>
               ))}
+              <div ref={messagesEndRef} />
             </div>
           </Paper>
         </>
