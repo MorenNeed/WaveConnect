@@ -7,7 +7,7 @@
     "build:dev": "tsc --watch --preserveWatchOutput",
     "start:dev": "nodemon dist/index.js & webpack -w",
     "start:prod": "node dist/index.js",
-    "build:prod": "tsc && webpack"
+    "build:prod": "npm install --force && tsc && webpack"
   },
   "keywords": [],
   "author": "",
