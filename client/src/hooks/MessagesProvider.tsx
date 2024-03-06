@@ -32,7 +32,7 @@ const MessagesProvider: React.FC<{ children: React.ReactNode }> = ({ children })
             const message = await createMessageCall(sender, content, files, conversationId);
             setLoading(false);
             return message;
-        } catch (error) {
+        } catch (error: any) {
             setError(error.message);
             setLoading(false);
             throw error;

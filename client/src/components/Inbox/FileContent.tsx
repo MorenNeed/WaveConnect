@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import DownloadIcon from '@mui/icons-material/FileDownload';
 import Modal from '@material-ui/core/Modal';
+import { Attachement } from '../../types/Attachement';
 
 const useStyles = makeStyles((theme) => ({
     messageFile: {
@@ -41,11 +42,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const FileContent = ({ attachment }) => {
+const FileContent = ({ attachment }: { attachment: Attachement }) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
 
-    const isImage = (attachment) => attachment.type.startsWith('image');
+    const isImage = (attachment: Attachement) => attachment.type.startsWith('image');
 
     const handleClick = () => {
         if (isImage(attachment)) {
@@ -57,12 +58,12 @@ const FileContent = ({ attachment }) => {
         setOpen(false);
     };
 
-    const formatSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const formatSize = (bytes: string): string => {
+        if (bytes === '0') return '0 Bytes';
+        const k: number = 1024;
+        const sizes: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i: number = Math.floor(Math.log(Number(bytes)) / Math.log(k));
+        return parseFloat((Number(bytes) / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
     return (

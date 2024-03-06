@@ -59,8 +59,7 @@ const Inbox = () => {
   return (
     <div className={classes.root}>
       <InboxBar
-        username={user?.email}
-        onSettingsClick={handleSettingsClick}
+        username={user?.email ?? ""}
         onLogoutClick={handleLogoutClick}
       />
       <div className={classes.chatSection}>

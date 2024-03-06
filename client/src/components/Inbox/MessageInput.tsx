@@ -41,7 +41,7 @@ const MessageInput = () => {
     const { user } = useAuth();
     const { selectedConversation, addMessage } = useConversation();
 
-    const handleMessageChange = (e) => {
+    const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setMessage(e.target.value);
     };
 

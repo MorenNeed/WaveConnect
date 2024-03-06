@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-const InboxBar = ({ username, onSettingsClick, onLogoutClick }) => {
+const InboxBar = ({ username, onLogoutClick }: { username: string, onLogoutClick: () => void }) => {
     const classes = useStyles();
     const { isMobile, menuToggled, toggleMenuClick } = useMobile();
 
