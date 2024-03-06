@@ -1,5 +1,12 @@
 const path = require("path");
-const Dotenv = require("dotenv-webpack");
+
+let env = process.env.NODE_ENV || "development";
+let plugins = [];
+if (env !== "production") {
+  require("dotenv").config();
+  const Dotenv = require("dotenv-webpack");
+  plugins.push(new Dotenv({ systemvars: true }));
+}
 
 module.exports = {
   entry: "./client/index.tsx",
@@ -16,7 +23,7 @@ module.exports = {
       },
     ],
   },
-  mode: "development",
+  mode: env,
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
@@ -24,5 +31,5 @@ module.exports = {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public"),
   },
-  plugins: [new Dotenv()],
+  plugins: plugins,
 };
