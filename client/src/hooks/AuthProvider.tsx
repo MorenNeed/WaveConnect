@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../types/User";
 import { loginCall, meCall, registerCall, logoutCall } from "../api/auth";
-import { useNavigate } from "react-router";
 
 interface AuthContextValue {
     user: User | null;
+    token: string | null;
     error: string | null;
     loading: boolean;
     login: (email: string, password: string) => void;
@@ -14,6 +14,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue>({
     user: null,
+    token: null,
     error: null,
     loading: true,
     login: () => { },
@@ -29,36 +30,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [token, setToken] = useState<string | null>(() => localStorage.getItem("token")); // Initialize token from localStorage
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const user = await meCall();
-                setUser(user);
-            } catch (error) {
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, []);
+        setLoading(true);
+        if (token) {
+            meCall(token)
+                .then((user) => {
+                    setUser(user);
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    setError(error.message);
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
+    }, [token]);
 
     const login = (email: string, password: string) => {
-        loginCall(email, password).then((user) => setUser(user)).catch((error) => setError(error.message));
+        setLoading(true);
+        loginCall(email, password)
+            .then((user) => {
+                setUser(user);
+                setToken(user.token);
+                setLoading(false);
+                if (user.token) localStorage.setItem("token", user.token);
+                console.log(user.token);
+            })
+            .catch((error) => {
+                setError(error.message);
+                setLoading(false);
+            });
     }
 
     const register = (email: string, password: string, name: string) => {
-        registerCall(email, password, name).then((user) => setUser(user)).catch((error) => setError(error.message));
+        setLoading(true);
+        registerCall(email, password, name)
+            .then((user) => {
+                setUser(user);
+                setToken(user.token);
+                setLoading(false);
+                if (user.token) localStorage.setItem("token", user.token);
+            })
+            .catch((error) => {
+                setError(error.message);
+                setLoading(false);
+            });
     }
 
     const logout = () => {
-        logoutCall().then(() => setUser(null)).catch((error) => setError(error.message));
-    };
+        setLoading(true);
+        if (token) {
+            logoutCall(token)
+                .then(() => {
+                    setUser(null);
+                    setToken(null);
+                    setLoading(false);
+                    localStorage.removeItem("token");
+                })
+                .catch((error) => {
+                    setError(error.message);
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
+    }
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, error, loading }}>
+        <AuthContext.Provider value={{ token, user, login, register, logout, error, loading }}>
             {children}
         </AuthContext.Provider>
     );

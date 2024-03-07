@@ -16,19 +16,23 @@ export const loginCall = async (email: string, password: string): Promise<User> 
     }
 }
 
-export const meCall = async (): Promise<User | null> => {
+export const meCall = async (token: string | null): Promise<User | null> => {
     try {
-        const response = await axios.get(`${baseURL}/auth/me`);
+        const response = await axios.get(`${baseURL}/auth/me`, {
+            headers: {
+                Authorization: token
+            }
+        });
         return response.data;
     } catch (error) {
-        return null;
+        throw new Error("Unknown error");
     }
 }
 
 export const registerCall = async (email: string, password: string, name: string): Promise<User> => {
     try {
         const response = await axios.post(`${baseURL}/auth/register`, { email, password, name });
-        return response.data.user;
+        return response.data;
     } catch (error: any) {
         if (error.response.status === 409) {
             throw new Error("User already exists");
@@ -38,9 +42,13 @@ export const registerCall = async (email: string, password: string, name: string
     }
 }
 
-export const logoutCall = async (): Promise<void> => {
+export const logoutCall = async (token: string | null): Promise<void> => {
     try {
-        await axios.post(`${baseURL}/auth/logout`);
+        await axios.post(`${baseURL}/auth/logout`, {}, {
+            headers: {
+                Authorization: token
+            }
+        });
     } catch (error) {
         throw new Error("Unknown error");
     }
