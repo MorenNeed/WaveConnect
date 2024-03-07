@@ -32,6 +32,27 @@ class ConversationsController {
             next(error);
         }
     }
+
+    async updateMessageInConversation(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { conversationId, messageId } = req.params;
+            const message = req.body;
+            const conversation = await ConversationsService.updateMessageInConversation(conversationId, messageId, message);
+            res.json(conversation);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteMessageFromConversation(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { conversationId, messageId } = req.params;
+            await ConversationsService.deleteMessageFromConversation(conversationId, messageId);
+            res.status(204).end();
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new ConversationsController();

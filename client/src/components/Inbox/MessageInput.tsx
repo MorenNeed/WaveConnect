@@ -35,7 +35,7 @@ const MessageInput = () => {
     const classes = useStyles();
     const [message, setMessage] = useState("");
     const [files, setFiles] = useState<File[]>([]);
-    const [fileName, setFileName] = useState<string>("");
+    const [fileNames, setFileNames] = useState<string[]>([]);
     const [filesAttached, setFilesAttached] = useState<boolean>(false);
     const { createMessage } = useMessages();
     const { user } = useAuth();
@@ -50,7 +50,7 @@ const MessageInput = () => {
         if (files) {
             setFiles(Array.from(files));
             setFilesAttached(true);
-            setFileName(files[0].name); // Set the name of the attached file
+            setFileNames(Array.from(files).map((file) => file.name));
         }
     }
 
@@ -70,7 +70,7 @@ const MessageInput = () => {
             setMessage("");
             setFiles([]);
             setFilesAttached(false);
-            setFileName(""); // Reset the file name after sending the message
+            setFileNames([]);
         }
     };
 
@@ -101,7 +101,16 @@ const MessageInput = () => {
                 disabled={isDisabled}
             />
             {filesAttached && (
-                <Typography className={classes.fileAttached} variant="body2">{fileName}</Typography>
+                fileNames.slice(0, 1).map((name, index) => (
+                <Typography className={classes.fileAttached} variant="body2">
+                        <span key={index}>{name}</span>
+                </Typography>
+                ))
+            )}
+            {fileNames.length > 1 && (
+                <Typography className={classes.fileAttached} variant="body2">
+                    <span>+{fileNames.length - 1} more</span>
+                </Typography>
             )}
             <IconButton aria-label="send message" onClick={handleMessageSend} disabled={isDisabled}>
                 <SendIcon />

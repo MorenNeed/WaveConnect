@@ -2,8 +2,8 @@ import { Content } from "../models/Content";
 import { Message } from "../models/Message";
 import db from "../firebase/db";
 import { v4 as uuidv4 } from "uuid";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, setDoc, deleteDoc, getDoc, Timestamp } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { Attachement } from "../models/Attachement";
 import fs from "fs";
 
@@ -81,6 +81,40 @@ class MessagesService {
         await setDoc(messageRef, message);
 
         return message;
+    }
+
+    async updateMessage(messageId: string, content: Content): Promise<Message> {
+        const messageRef = doc(db, "messages", messageId);
+        const messageDoc = await getDoc(messageRef);
+        if (!messageDoc.exists()) {
+            throw new Error("Message not found");
+        }
+
+        const message: Message = messageDoc.data() as Message;
+        message.content = content;
+        message.updatedAt = Timestamp.now().toDate().toISOString();
+
+        await setDoc(messageRef, message);
+
+        return message;
+    }
+
+    async deleteMessage(messageId: string): Promise<void> {
+        const messageRef = doc(db, "messages", messageId);
+        const messageDoc = await getDoc(messageRef);
+        if (!messageDoc.exists()) {
+            throw new Error("Message not found");
+        }
+        const message = messageDoc.data() as Message;
+        if (message.content.attachements && message.content.attachements.length > 0) {
+            const storage = getStorage();
+            for (let i = 0; i < message.content.attachements.length; i++) {
+                const attachement = message.content.attachements[i];
+                const attachementRef = ref(storage, attachement.url);
+                await deleteObject(attachementRef);
+            }
+        }
+        await deleteDoc(messageRef);
     }
 }
 

@@ -1,6 +1,6 @@
 import { Conversation } from "../models/Conversation";
 import db from "../firebase/db";
-import { collection, doc, getDocs, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, deleteDoc, setDoc, Timestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { Message } from "../models/Message";
 import UsersService from "./UsersService";
@@ -56,6 +56,45 @@ class ConversationsService {
         conversation.updatedAt = Timestamp.now().toDate().toISOString();
         await setDoc(conversationRef, conversation);
         return conversation;
+    }
+
+    async updateMessageInConversation(conversationId: string, messageId: string, message: Message): Promise<Conversation> {
+        const conversationRef = doc(db, "conversations", conversationId);
+        const conversationDoc = await getDoc(conversationRef);
+        if (!conversationDoc.exists()) {
+            throw new Error("Conversation not found");
+        }
+        const conversation = conversationDoc.data() as Conversation;
+        const messageIndex = conversation.messages.findIndex((msg) => msg._id === messageId);
+        if (messageIndex === -1) {
+            throw new Error("Message not found");
+        }
+        if (message._id === conversation.lastMessage?._id) {
+            conversation.lastMessage = message;
+        }
+        conversation.messages[messageIndex] = message;
+        conversation.updatedAt = Timestamp.now().toDate().toISOString();
+        await setDoc(conversationRef, conversation);
+        return conversation;
+    }
+
+    async deleteMessageFromConversation(conversationId: string, messageId: string): Promise<void> {
+        const conversationRef = doc(db, "conversations", conversationId);
+        const conversationDoc = await getDoc(conversationRef);
+        if (!conversationDoc.exists()) {
+            throw new Error("Conversation not found");
+        }
+        const conversation = conversationDoc.data() as Conversation;
+        const messageIndex = conversation.messages.findIndex((msg) => msg._id === messageId);
+        if (messageIndex === -1) {
+            throw new Error("Message not found");
+        }
+        conversation.messages = conversation.messages.filter((msg) => msg._id !== messageId);
+        if (conversation.lastMessage?._id === messageId) {
+            conversation.lastMessage = conversation.messages[conversation.messages.length - 1] || null;
+        }
+        conversation.updatedAt = Timestamp.now().toDate().toISOString();
+        await setDoc(conversationRef, conversation);
     }
 }
 

@@ -4,6 +4,8 @@ import expressFormidable from "express-formidable";
 
 const router = Router();
 
-router.post("/create", expressFormidable(), MessagesController.createMessage);
+router.post("/", expressFormidable({ multiples: true }), MessagesController.createMessage);
+router.put("/:messageId", MessagesController.updateMessage);
+router.delete("/:messageId", MessagesController.deleteMessage);
 
 export default router;

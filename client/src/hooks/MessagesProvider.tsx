@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { createMessageCall } from "../api/messages";
+import { createMessageCall, updateMessageCall, deleteMessageCall } from "../api/messages";
 import { Content } from "../types/Content";
 import { Message } from "../types/Message";
 
@@ -7,9 +7,8 @@ interface MessagesContextValue {
     error: string | null;
     loading: boolean;
     createMessage: (sender: string, content: Content, files: File[], conversationId: string) => Promise<Message>;
-    // TODO: Implement the rest of the CRUD operations
-    // updateMessage: (message: Message) => void;
-    // deleteMessage: (messageId: string) => void;
+    updateMessage: (messageId: string, content: Content) => Promise<Message>;
+    deleteMessage: (messageId: string) => Promise<void>;
 }
 
 const MessagesContext = createContext<MessagesContextValue | undefined>(undefined);
@@ -39,8 +38,33 @@ const MessagesProvider: React.FC<{ children: React.ReactNode }> = ({ children })
         }
     }
 
+    const updateMessage = async (messageId: string, content: Content): Promise<Message> => {
+        setLoading(true);
+        try {
+            const message = await updateMessageCall(messageId, content);
+            setLoading(false);
+            return message;
+        } catch (error: any) {
+            setError(error.message);
+            setLoading(false);
+            throw error;
+        }
+    }
+
+    const deleteMessage = async (messageId: string): Promise<void> => {
+        setLoading(true);
+        try {
+            await deleteMessageCall(messageId);
+            setLoading(false);
+        } catch (error: any) {
+            setError(error.message);
+            setLoading(false);
+            throw error;
+        }
+    }
+
     return (
-        <MessagesContext.Provider value={{ error, loading, createMessage }}>
+        <MessagesContext.Provider value={{ error, loading, createMessage, updateMessage, deleteMessage }}>
             {children}
         </MessagesContext.Provider>
     );

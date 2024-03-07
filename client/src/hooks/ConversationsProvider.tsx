@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Conversation } from "../types/Conversation";
-import { createConversationByUsersIdCall, getConversationsByUserIdCall, addMessageToConversationCall } from '../api/conversations';
+import { createConversationByUsersIdCall, getConversationsByUserIdCall, addMessageToConversationCall, updateMessageInConversationCall, deleteMessageFromConversationCall } from '../api/conversations';
 import { useAuth } from "./AuthProvider";
 import { Message } from "../types/Message";
 
@@ -12,6 +12,8 @@ interface ConversationContextValue {
     createConversation: (userId: string, recipientId: string) => void;
     getConversations: (userId: string) => void;
     addMessage: (conversationId: string, message: Message) => void;
+    updateMessageInConversation: (conversationId: string, message: Message) => void;
+    deleteMessageFromConversation: (conversationId: string, messageId: string) => void;
     selectConversation: (conversation: Conversation) => void;
     unselectConversation: () => void;
 }
@@ -81,8 +83,39 @@ const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             .catch((error) => setError(error.message));
     }
 
+    const updateMessageInConversation = (conversationId: string, message: Message) => {
+        updateMessageInConversationCall(conversationId, message)
+            .then((conversation: Conversation) => {
+                const updatedConversations = userConversations.map((conv) => {
+                    if (conv._id === conversation._id) {
+                        return conversation;
+                    }
+                    return conv;
+                });
+                setUserConversations(updatedConversations);
+                setSelectedConversation(conversation);
+            })
+            .catch((error: any) => setError(error.message));
+    }
+
+    const deleteMessageFromConversation = (conversationId: string, messageId: string) => {
+        deleteMessageFromConversationCall(conversationId, messageId).then(() => {
+            const conversation = userConversations.find((conv) => conv._id === conversationId);
+            if (conversation) {
+                const updatedMessages = conversation.messages.filter((msg) => msg._id !== messageId);
+                conversation.messages = updatedMessages;
+                if (conversation.lastMessage?._id === messageId) {
+                    conversation.lastMessage = updatedMessages[updatedMessages.length - 1] || null;
+                }
+                setUserConversations([...userConversations]);
+                setSelectedConversation(conversation);
+            }
+        }
+        ).catch((error) => setError(error.message));
+    }
+
     return (
-        <ConversationContext.Provider value={{ userConversations, selectedConversation, error, loading, createConversation, getConversations, selectConversation, addMessage, unselectConversation }}>
+        <ConversationContext.Provider value={{ userConversations, selectedConversation, error, loading, createConversation, getConversations, selectConversation, addMessage, unselectConversation, updateMessageInConversation, deleteMessageFromConversation }}>
             {children}
         </ConversationContext.Provider>
     );

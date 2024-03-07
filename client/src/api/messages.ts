@@ -9,11 +9,13 @@ export const createMessageCall = async (sender: string, content: Content, files:
     formData.append('conversationId', conversationId);
     formData.append('text', content.text);
 
-    for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
+    if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
     }
 
-    const response = await axios.post(`${baseURL}/messages/create`, formData, {
+    const response = await axios.post(`${baseURL}/messages`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -22,13 +24,12 @@ export const createMessageCall = async (sender: string, content: Content, files:
     return response.data;
 }
 
-// TODO: Implement the rest of the CRUD operations
-// export const updateMessage = async (message: Message) => {
-//     const response = await axios.put(`${baseURL}/messages/${message._id}`, message);
-//     return response.data;
-// }
+export const updateMessageCall = async (messageId: string, content: Content) => {
+    const response = await axios.put(`${baseURL}/messages/${messageId}`, content);
+    return response.data;
+}
 
-// export const deleteMessage = async (messageId: string) => {
-//     const response = await axios.delete(`${baseURL}/messages/${messageId}`);
-//     return response.data;
-// }
+export const deleteMessageCall = async (messageId: string) => {
+    const response = await axios.delete(`${baseURL}/messages/${messageId}`);
+    return response.data;
+}
